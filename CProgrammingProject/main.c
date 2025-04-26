@@ -39,6 +39,7 @@ typedef struct
     int health;
     int damage;
     ItemArray items;
+    int jumpIndex;
 } Player;
 
 // Enemy
@@ -77,14 +78,16 @@ typedef enum
     true
 } bool;
 
-bool Lobby(void);
+MainMenu Lobby(void);
 bool LobbyExit(MainMenu selection);
 Map *LoadMap(void);
 Player MakePlayer(void);
 EnemyArray MakeEnemies(void);
 void InGame(bool playing);
 char GetInput(void);
-void MovePlayer(Position *position, char input);
+void MovePlayer(Player *player, char input);
+void Jump(Player *player);
+void Jumping(Player *player, Map *map);
 void MoveEnemy(EnemyArray *enemies);
 void Interaction(Player *player);
 void Battle(Player *player, Enemy *enemy);
@@ -93,11 +96,14 @@ void UpdateScreen(const Frame *frame);
 
 //Size of the screen
 const Position size = {10, 10};
+const int JUMP_FRAMES = 8;
+const int jumpOffsets[JUMP_FRAMES] = {0, 3, 2, 1, 0, -1, -2, -3};
+double deltaTime;
 
 //Lobby
-bool Lobby(void)
+MainMenu Lobby(void)
 {
-    MainMenu selection;
+    MainMenu selection = start;
     char input;
     char *screen = malloc(sizeof(char) * (size.x + 1) * size.y);
     
@@ -114,12 +120,14 @@ bool Lobby(void)
                 if(selection > start) {
                     selection--;
                 }
+                break;
             case 'd':
                 if(selection < quit) {
                     selection++;
                 }
                 break;
             case '\n':
+                free(screen);
                 return LobbyExit(selection);
         }
     }
@@ -140,11 +148,12 @@ bool LobbyExit(MainMenu selection)
 
 Map *LoadMap(void)
 {
-    Map *map = { malloc(sizeof(char) * (size.x + 1) * size.y + 1), NULL };
+    Map *map = malloc(sizeof(Map));
+    map -> map = malloc(sizeof(char) * (size.x + 1) * size.y + 1);
     FILE *fp;
     
     fp = fopen("map.txt", "r");
-    if (fp == NULL)
+    if (map || map -> map || fp == NULL)
     {
         fprintf(stderr, "ERR: Failed to load Map!\n");
         exit(EXIT_FAILURE);
@@ -159,7 +168,7 @@ Map *LoadMap(void)
 
 Player MakePlayer(void)
 {
-    Player player = {{0, 0}, 100, 10, NULL};
+    Player player = {{0, 0}, 100, 10, NULL, 0};
     return player;
 }
 
@@ -173,6 +182,7 @@ EnemyArray MakeEnemies(void)
         exit(EXIT_FAILURE);
     }
     
+    enemyArray.size = 0;
     return enemyArray;
 }
 
@@ -194,10 +204,9 @@ void InGame(bool playing)
     srand((unsigned)time(NULL));
     
     LARGE_INTEGER frequency, frameStart, frameEnd;
-    double elapsedTime;
     const double frameDuration = 1000.0 / 60.0; //60프레임 제한
     QueryPerformanceFrequency(&frequency);
-
+    
     Map *map = LoadMap();
     Player player = MakePlayer();
     EnemyArray enemies = MakeEnemies();
@@ -210,18 +219,19 @@ void InGame(bool playing)
         UpdateScreen(&frame);
         
         char input = GetInput();
-        if (char != NULL)
+        if (char != '\0')
         {
-            MovePlayer(&player.position, input);
+            MovePlayer(&player, input);
         }
+        Jumping(&player, map);
         MoveEnemy(&enemies);
         
         QueryPerformanceCounter(&frameEnd); //측정 끝
         
-        elapsedTime = (double)(frameEnd.QuadPart - frameStart.QuadPart) * 1000.0 / frequency.QuadPart;
-        if (elapsedTime < frameDuration) //60프레임으로 맞춤
+        deltaTime = (double)(frameEnd.QuadPart - frameStart.QuadPart) * 1000.0 / frequency.QuadPart;
+        if (deltaTime < frameDuration) //60프레임으로 맞춤
         {
-            Sleep((DWORD)(frameDuration - elapsedTime));
+            Sleep((DWORD)(frameDuration - deltaTime));
         }
     }
 }
@@ -234,29 +244,44 @@ char GetInput(void)
         return _getch();
     }
     
-    return NULL;
+    return '\0';
 }
 
 // Apply input to position
-void MovePlayer(Position *position, char input)
+void MovePlayer(Player *player, char input)
 {
     switch (input)
     {
-        case 'w':
-            position -> y++;
-            break;
         case 'a':
-            position -> x--;
-            break;
-        case 's':
-            position -> y--;
+            player -> position.x--;
             break;
         case 'd':
-            position -> x++;
+            player -> position.x++;
+            break;
+        case ' ':
+            Jump(player);
             break;
     }
-    
-    printf("%d %d", position -> x, position -> y);
+}
+
+void Jump(Player *player) {
+    if(!player -> jumpIndex) {
+        player -> jumpIndex = 1;
+    }
+}
+
+void Jumping(Player *player, Map *map) {
+    if(player -> jumpIndex) {
+        player -> position.y += jumpOffsets[player -> jumpIndex];
+        player->jumpIndex++;
+        
+        if (player -> jumpIndex >= JUMP_FRAMES) {
+            player -> jumpIndex = 0;
+        }
+    }
+    if(map -> map[(player -> position.y - 1) * size.x + player -> position.x] == ' ') {
+        player -> position.y--;
+    }
 }
 
 // Apply random movement to enemy position
