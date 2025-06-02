@@ -3,6 +3,11 @@
 #include <time.h>
 #include <windows.h>
 
+typedef enum
+{
+    PLAYER, ENEMY, TERRAIN, NONE
+} Entity;
+
 // Position on screen
 typedef struct
 {
@@ -14,7 +19,6 @@ typedef struct
 typedef struct
 {
     char *screen;
-    Position size;
     char *text;
 } Frame;
 
@@ -57,18 +61,24 @@ typedef struct
     size_t size;
 } EnemyArray;
 
+typedef struct
+{
+    char c;
+    Entity entity;
+    Item item;
+} Pixel;
+
 // Map and items on the map
 typedef struct {
-    char *map;
-    ItemArray items;
+    Pixel *pixels;
 } Map;
 
 //Main Menu Value
 typedef enum
 {
-    start,
-    settings,
-    quit
+    START,
+    SETTINGS,
+    QUIT
 } MainMenu;
 
 //BOOLEAN
@@ -78,32 +88,34 @@ typedef enum
     true
 } bool;
 
-MainMenu Lobby(void);
+bool Lobby(void);
 bool LobbyExit(MainMenu selection);
 Map *LoadMap(void);
 Player MakePlayer(void);
 EnemyArray MakeEnemies(void);
 void InGame(bool playing);
 char GetInput(void);
-void MovePlayer(Player *player, char input);
+void MovePlayer(Player *player, Map *map, char input);
 void Jump(Player *player);
 void Jumping(Player *player, Map *map);
 void MoveEnemy(EnemyArray *enemies);
 void Interaction(Player *player);
 void Battle(Player *player, Enemy *enemy);
-Frame GenerateFrame(const char *map, const Player *player, const EnemyArray *enemies);
+Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray *enemies);
 void UpdateScreen(const Frame *frame);
 
 //Size of the screen
 const Position size = {10, 10};
+
 const int JUMP_FRAMES = 8;
 const int jumpOffsets[JUMP_FRAMES] = {0, 3, 2, 1, 0, -1, -2, -3};
+
 double deltaTime;
 
 //Lobby
-MainMenu Lobby(void)
+bool Lobby(void)
 {
-    MainMenu selection = start;
+    MainMenu selection = START;
     char input;
     char *screen = malloc(sizeof(char) * (size.x + 1) * size.y);
     
@@ -117,12 +129,12 @@ MainMenu Lobby(void)
         switch (input)
         {
             case 'a':
-                if(selection > start) {
+                if(selection > START) {
                     selection--;
                 }
                 break;
             case 'd':
-                if(selection < quit) {
+                if(selection < QUIT) {
                     selection++;
                 }
                 break;
@@ -137,11 +149,11 @@ MainMenu Lobby(void)
 bool LobbyExit(MainMenu selection)
 {
     switch(selection) {
-        case start:
+        case START:
             return true;
-        case settings:
+        case SETTINGS:
             return true;
-        case quit:
+        case QUIT:
             return false;
     }
 }
@@ -149,19 +161,24 @@ bool LobbyExit(MainMenu selection)
 Map *LoadMap(void)
 {
     Map *map = malloc(sizeof(Map));
-    map -> map = malloc(sizeof(char) * (size.x + 1) * size.y + 1);
+    map -> pixels = malloc(sizeof(Pixel) * (size.x + 1) * size.y + 1);
     FILE *fp;
     
     fp = fopen("map.txt", "r");
-    if (map || map -> map || fp == NULL)
+    if (map || map -> pixels || fp == NULL)
     {
         fprintf(stderr, "ERR: Failed to load Map!\n");
         exit(EXIT_FAILURE);
     }
     
-    size_t bytes = fread(map -> map, sizeof(char), (size.x + 1) * size.y, fp);
+    size_t total = (size.x + 1) * size.y;
+    for (size_t i = 0; i < total; i++) {
+        if (fread(&map -> pixels[i].c, sizeof(char), 1, fp) != 1) {
+            break;
+        }
+    }
     fclose(fp);
-    map -> map[bytes] = '\0';
+    map -> pixels[total].c = '\0';
     
     return map;
 }
@@ -219,9 +236,9 @@ void InGame(bool playing)
         UpdateScreen(&frame);
         
         char input = GetInput();
-        if (char != '\0')
+        if (input != '\0')
         {
-            MovePlayer(&player, input);
+            MovePlayer(&player, map, input);
         }
         Jumping(&player, map);
         MoveEnemy(&enemies);
@@ -248,15 +265,25 @@ char GetInput(void)
 }
 
 // Apply input to position
-void MovePlayer(Player *player, char input)
+void MovePlayer(Player *player, Map *map, char input)
 {
+    if(map -> pixels[size.x * (player -> position.y + 1) + player -> position.x].entity == NONE)
+  {
+      player -> position.y--;
+  }
+    int newPos = player -> position.x;
     switch (input)
     {
         case 'a':
-            player -> position.x--;
-            break;
+            newPos -= 2; //아래까지 실행되며 newPos는 최종적으로 -1이 가해진 값
         case 'd':
-            player -> position.x++;
+            newPos += 1;
+            if(map -> pixels[(size.x * player -> position.y) + newPos].entity == NONE)
+            {
+                map -> pixels[(size.x * player -> position.y) + player -> position.x].entity = NONE; //플레이어 크기만큼 변경으로 바꿀것
+                player -> position.x = newPos;
+                map -> pixels[(size.x * player -> position.y) + newPos].entity = PLAYER; //여기도
+            }
             break;
         case ' ':
             Jump(player);
@@ -272,14 +299,16 @@ void Jump(Player *player) {
 
 void Jumping(Player *player, Map *map) {
     if(player -> jumpIndex) {
+        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = NONE; //여기도 플레이어 범위만큼으로
         player -> position.y += jumpOffsets[player -> jumpIndex];
         player->jumpIndex++;
+        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = PLAYER; //여기도
         
         if (player -> jumpIndex >= JUMP_FRAMES) {
             player -> jumpIndex = 0;
         }
     }
-    if(map -> map[(player -> position.y - 1) * size.x + player -> position.x] == ' ') {
+    if(map -> pixels[(player -> position.y - 1) * size.x + player -> position.x].entity == NONE) {
         player -> position.y--;
     }
 }
@@ -289,18 +318,23 @@ void MoveEnemy(EnemyArray *enemies)
 {
     for (int i = 0; i < enemies -> size; i++)
     {
-        int _x = rand() % 2 - 1, _y = rand() % 2 - 1;
+        int x = rand() % 2 - 1, y = rand() % 2 - 1;
         
-        enemies -> enemy[i].position.x += _x;
-        enemies -> enemy[i].position.y += _y;
+        enemies -> enemy[i].position.x += x;
+        enemies -> enemy[i].position.y += y;
     }
 }
 
 // Combine all entities, map, screen border and return
-Frame GenerateFrame(const char *map, const Player *player, const EnemyArray *enemies)
+Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray *enemies)
 {
-    Frame frame = { NULL, size, NULL };
-    frame.screen = map;
+    char screen[(size.x + 1) * size.y];
+    for(int i = 0; i < (size.x + 1) * size.y; i++)
+    {
+        screen[i] = pixels[i].c;
+    }
+    
+    Frame frame = { screen, NULL };
     
     return frame;
 }
@@ -310,4 +344,5 @@ void UpdateScreen(const Frame *frame)
 {
     system("cls");
     printf("%s", frame->screen);
+    printf("%s", frame->text);
 }
