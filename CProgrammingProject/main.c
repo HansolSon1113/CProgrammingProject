@@ -2,18 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <windows.h>
-
-typedef enum
-{
-    PLAYER, ENEMY, TERRAIN, NONE
-} Entity;
-
-// Position on screen
-typedef struct
-{
-    int x;
-    int y;
-} Position;
+#include <player.h>
+#include <pixel.h>
+#include <map.h>
 
 // Image to print on screen.
 typedef struct
@@ -21,30 +12,6 @@ typedef struct
     char *screen;
     char *text;
 } Frame;
-
-// Item
-typedef struct
-{
-    int barrier;
-    float damageMultiplier;
-} Item;
-
-//Array holding items of player
-typedef struct
-{
-    Item *item;
-    size_t size;
-} ItemArray;
-
-// Player
-typedef struct
-{
-    Position position;
-    int health;
-    int damage;
-    ItemArray items;
-    int jumpIndex;
-} Player;
 
 // Enemy
 typedef struct
@@ -60,18 +27,6 @@ typedef struct
     Enemy *enemy;
     size_t size;
 } EnemyArray;
-
-typedef struct
-{
-    char c;
-    Entity entity;
-    Item item;
-} Pixel;
-
-// Map and items on the map
-typedef struct {
-    Pixel *pixels;
-} Map;
 
 //Main Menu Value
 typedef enum
@@ -90,25 +45,16 @@ typedef enum
 
 bool Lobby(void);
 bool LobbyExit(MainMenu selection);
-Map *LoadMap(void);
-Player MakePlayer(void);
 EnemyArray MakeEnemies(void);
 void InGame(bool playing);
 char GetInput(void);
-void MovePlayer(Player *player, Map *map, char input);
-void Jump(Player *player);
-void Jumping(Player *player, Map *map);
 void MoveEnemy(EnemyArray *enemies);
-void Interaction(Player *player);
 void Battle(Player *player, Enemy *enemy);
 Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray *enemies);
 void UpdateScreen(const Frame *frame);
 
 //Size of the screen
-const Position size = {10, 10};
-
-const int JUMP_FRAMES = 8;
-const int jumpOffsets[JUMP_FRAMES] = {0, 3, 2, 1, 0, -1, -2, -3};
+extern const Position size;
 
 double deltaTime;
 
@@ -156,37 +102,6 @@ bool LobbyExit(MainMenu selection)
         case QUIT:
             return false;
     }
-}
-
-Map *LoadMap(void)
-{
-    Map *map = malloc(sizeof(Map));
-    map -> pixels = malloc(sizeof(Pixel) * (size.x + 1) * size.y + 1);
-    FILE *fp;
-    
-    fp = fopen("map.txt", "r");
-    if (map || map -> pixels || fp == NULL)
-    {
-        fprintf(stderr, "ERR: Failed to load Map!\n");
-        exit(EXIT_FAILURE);
-    }
-    
-    size_t total = (size.x + 1) * size.y;
-    for (size_t i = 0; i < total; i++) {
-        if (fread(&map -> pixels[i].c, sizeof(char), 1, fp) != 1) {
-            break;
-        }
-    }
-    fclose(fp);
-    map -> pixels[total].c = '\0';
-    
-    return map;
-}
-
-Player MakePlayer(void)
-{
-    Player player = {{0, 0}, 100, 10, NULL, 0};
-    return player;
 }
 
 EnemyArray MakeEnemies(void)
@@ -262,55 +177,6 @@ char GetInput(void)
     }
     
     return '\0';
-}
-
-// Apply input to position
-void MovePlayer(Player *player, Map *map, char input)
-{
-    if(map -> pixels[size.x * (player -> position.y + 1) + player -> position.x].entity == NONE)
-  {
-      player -> position.y--;
-  }
-    int newPos = player -> position.x;
-    switch (input)
-    {
-        case 'a':
-            newPos -= 2; //아래까지 실행되며 newPos는 최종적으로 -1이 가해진 값
-        case 'd':
-            newPos += 1;
-            if(map -> pixels[(size.x * player -> position.y) + newPos].entity == NONE)
-            {
-                map -> pixels[(size.x * player -> position.y) + player -> position.x].entity = NONE; //플레이어 크기만큼 변경으로 바꿀것
-                player -> position.x = newPos;
-                map -> pixels[(size.x * player -> position.y) + newPos].entity = PLAYER; //여기도
-            }
-            break;
-        case ' ':
-            Jump(player);
-            break;
-    }
-}
-
-void Jump(Player *player) {
-    if(!player -> jumpIndex) {
-        player -> jumpIndex = 1;
-    }
-}
-
-void Jumping(Player *player, Map *map) {
-    if(player -> jumpIndex) {
-        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = NONE; //여기도 플레이어 범위만큼으로
-        player -> position.y += jumpOffsets[player -> jumpIndex];
-        player->jumpIndex++;
-        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = PLAYER; //여기도
-        
-        if (player -> jumpIndex >= JUMP_FRAMES) {
-            player -> jumpIndex = 0;
-        }
-    }
-    if(map -> pixels[(player -> position.y - 1) * size.x + player -> position.x].entity == NONE) {
-        player -> position.y--;
-    }
 }
 
 // Apply random movement to enemy position
