@@ -57,13 +57,14 @@ void UpdateScreen(const Frame *frame);
 extern const Position size;
 
 double deltaTime;
+const double fixedDeltaTime = 1000.0 / 60.0;
 
 //Lobby
 bool Lobby(void)
 {
     MainMenu selection = START;
     char input;
-    char *screen = malloc(sizeof(char) * (size.x + 1) * size.y);
+    Pixel *screen = malloc(sizeof(Pixel) * (size.x + 1) * size.y);
     
     while (true)
     {
@@ -136,7 +137,6 @@ void InGame(bool playing)
     srand((unsigned)time(NULL));
     
     LARGE_INTEGER frequency, frameStart, frameEnd;
-    const double frameDuration = 1000.0 / 60.0; //60프레임 제한
     QueryPerformanceFrequency(&frequency);
     
     Map *map = LoadMap();
@@ -161,9 +161,9 @@ void InGame(bool playing)
         QueryPerformanceCounter(&frameEnd); //측정 끝
         
         deltaTime = (double)(frameEnd.QuadPart - frameStart.QuadPart) * 1000.0 / frequency.QuadPart;
-        if (deltaTime < frameDuration) //60프레임으로 맞춤
+        if (deltaTime < fixedDeltaTime) //60프레임으로 맞춤
         {
-            Sleep((DWORD)(frameDuration - deltaTime));
+            Sleep((DWORD)(fixedDeltaTime - deltaTime));
         }
     }
 }
