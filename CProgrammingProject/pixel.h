@@ -11,6 +11,13 @@
 #include "player.h"
 #include "entities.h"
 
+#define CheckScreenBoundary(pos, entitySize, screenSize) ( \
+    ( (pos).x < (entitySize).x / 2 + 1 ) || \
+    ( (pos).x > (screenSize).x - ((entitySize).x / 2 + 1) ) || \
+    ( (pos).y < (entitySize).y / 2 + 1 ) || \
+    ( (pos).y > (screenSize).y - ((entitySize).y / 2 + 1) ) \
+) ? 0 : 1
+
 // Position on screen
 typedef struct
 {
@@ -27,6 +34,6 @@ typedef struct
 
 const Position size = {10, 10};
 
-void Interaction(Player *player); //이동할때 빈자리 검증하는거 여기로 옮기기
+void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map); //이동할때 빈자리 검증하는거 여기로 옮기기
 
 #endif

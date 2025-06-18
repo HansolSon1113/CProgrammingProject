@@ -30,6 +30,7 @@ typedef struct
 typedef struct
 {
     Position position;
+    Position size;
     int health;
     int damage;
     ItemArray items;

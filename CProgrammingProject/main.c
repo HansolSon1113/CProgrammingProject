@@ -64,7 +64,12 @@ bool Lobby(void)
 {
     MainMenu selection = START;
     char input;
-    Pixel *screen = malloc(sizeof(Pixel) * (size.x + 1) * size.y);
+    Pixel *screen = (Pixel *)malloc(sizeof(Pixel) * (size.x + 1) * size.y);
+    if(screen == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for screen!\n");
+        exit(EXIT_FAILURE);
+    }
     
     while (true)
     {
@@ -108,7 +113,7 @@ bool LobbyExit(MainMenu selection)
 EnemyArray MakeEnemies(void)
 {
     EnemyArray enemyArray;
-    enemyArray.enemy = malloc(sizeof(Enemy));
+    enemyArray.enemy = (EnemyArray *)malloc(sizeof(Enemy));
     if (enemyArray.enemy == NULL)
     {
         fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
@@ -212,3 +217,6 @@ void UpdateScreen(const Frame *frame)
     printf("%s", frame->screen);
     printf("%s", frame->text);
 }
+
+
+

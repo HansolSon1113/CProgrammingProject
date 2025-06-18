@@ -24,19 +24,15 @@ void MovePlayer(Player *player, Map *map, char input)
     {
         player -> position.y--;
     }
-    int newPos = player -> position.x;
+    
+    Position newPos = { player -> position.x, player -> position.y };
     switch (input)
     {
         case 'a':
-            newPos -= 2; //아래까지 실행되며 newPos는 최종적으로 -1이 가해진 값
+            newPos.x -= 2; //아래까지 실행되며 newPos는 최종적으로 -1이 가해진 값
         case 'd':
-            newPos += 1;
-            if(map -> pixels[(size.x * player -> position.y) + newPos].entity == NONE)
-            {
-                map -> pixels[(size.x * player -> position.y) + player -> position.x].entity = NONE; //플레이어 크기만큼 변경으로 바꿀것
-                player -> position.x = newPos;
-                map -> pixels[(size.x * player -> position.y) + newPos].entity = PLAYER; //여기도
-            }
+            newPos.x += 1;
+            Interaction(player -> position, newPos, player -> size,  PLAYER, map);
             break;
         case ' ':
             Jump(player);
@@ -53,12 +49,13 @@ void Jump(Player *player) {
 
 void Jumping(Player *player, Map *map) {
     if(player -> jumpIndex) {
-        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = NONE; //여기도 플레이어 범위만큼으로
-        player -> position.y += jumpOffsets[player -> jumpIndex];
+        Position newPos = { player -> position.x, player -> position.y };
+        newPos.y += jumpOffsets[player -> jumpIndex];
         player->jumpIndex++;
-        map -> pixels[(size.x * player -> position.y) + player -> position.y].entity = PLAYER; //여기도
         
-        if (player -> jumpIndex >= JUMP_FRAMES) {
+        Interaction(player -> position, newPos, PLAYER, map);
+        
+        if (player -> jumpIndex >= JUMP_FRAMES - 1) {
             player -> jumpIndex = 0;
         }
     }

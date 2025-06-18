@@ -13,12 +13,11 @@
 
 Map *LoadMap(void)
 {
-    Map *map = malloc(sizeof(Map));
+    Map *map = (Map *)malloc(sizeof(Map));
     map -> pixels = malloc(sizeof(Pixel) * (size.x + 1) * size.y + 1);
     FILE *fp;
-    
     fp = fopen("map.txt", "r");
-    if (map || map -> pixels || fp == NULL)
+    if (map == NULL || map -> pixels == NULL || fp == NULL)
     {
         fprintf(stderr, "ERR: Failed to load Map!\n");
         exit(EXIT_FAILURE);
