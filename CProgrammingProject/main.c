@@ -9,7 +9,7 @@
 // Image to print on screen.
 typedef struct
 {
-    char *screen;
+    char **screen;
     char *text;
 } Frame;
 
@@ -50,7 +50,7 @@ void InGame(bool playing);
 char GetInput(void);
 void MoveEnemy(EnemyArray *enemies);
 void Battle(Player *player, Enemy *enemy);
-Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray *enemies);
+Frame GenerateFrame(const Pixel **pixels, const Player *player, const EnemyArray *enemies);
 void UpdateScreen(const Frame *frame);
 
 //Size of the screen
@@ -197,12 +197,43 @@ void MoveEnemy(EnemyArray *enemies)
 }
 
 // Combine all entities, map, screen border and return
-Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray *enemies)
+Frame GenerateFrame(const Pixel **pixels, const Player *player, const EnemyArray *enemies)
 {
-    char screen[(size.x + 1) * size.y];
-    for(int i = 0; i < (size.x + 1) * size.y; i++)
+    char **screen = malloc(sizeof(char) * size.x * size.y);
+    if(screen == NULL)
     {
-        screen[i] = pixels[i].c;
+        fprintf(stderr, "ERR: Failed to allocate memory for screen!\n");
+        exit(1);
+    }
+    
+    for(int y = 0; y < size.y; y++)
+    {
+        static Position beforePlayerPos = { -1, -1 };
+        static int playerAnimIndex = 0;
+        
+        for(int x = 0; x < size.x; x++)
+        {
+            screen[y][x] = pixels[y][x].c;
+            
+            if(player -> position.x - player -> size.x / 2 > x &&
+               x < player -> position.x + player -> size.x
+               && player -> position.y - player -> size.y / 2 < y &&
+               y < player -> position.y + player -> size.y / 2)
+            {
+                Position playerAnimPos = {
+                    x - player -> position.x,
+                    y - player -> position.y
+                };
+                
+                if(beforePlayerPos.x != -1 && beforePlayerPos.y != -1 && beforePlayerPos.x != player -> position.x && beforePlayerPos.y != player -> position.y)
+                {
+                    screen[y][x] = player -> anim.anim[playerAnimIndex][playerAnimPos.y][playerAnimPos.x];
+                    playerAnimIndex = (playerAnimIndex + 1) % 3;
+                } else {
+                    screen[y][x] = player -> anim.idle[playerAnimPos.y][playerAnimPos.x];
+                }
+            }
+        }
     }
     
     Frame frame = { screen, NULL };
@@ -214,7 +245,16 @@ Frame GenerateFrame(const Pixel *pixels, const Player *player, const EnemyArray 
 void UpdateScreen(const Frame *frame)
 {
     system("cls");
-    printf("%s", frame->screen);
+    
+    for(int y = 0; y < size.y; y++)
+    {
+        for(int x = 0; x < size.x; x++)
+        {
+            printf("%c", frame -> screen[y][x]);
+        }
+        printf("\n");
+    }
+    
     printf("%s", frame->text);
 }
 

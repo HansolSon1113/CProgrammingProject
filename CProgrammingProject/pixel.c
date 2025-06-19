@@ -17,20 +17,20 @@ void Interaction(Position *orgPos, Position newPos, Position entitySize, Entity 
     
     if(map -> pixels[newPos.y][newPos.x].entity == NONE)
     {
-        for(int y = -entitySize.y/2; y < entitySize.y / 2; y++)
+        for(int y = orgPos -> y - entitySize.y/2; y <= orgPos -> y + entitySize.y / 2; y++)
         {
-            for(int x = -entitySize.x/2; x < entitySize.x / 2; x++)
+            for(int x = orgPos -> x - entitySize.x/2; x <= orgPos -> x + entitySize.x / 2; x++)
             {
-                map -> pixels[orgPos -> y + y][orgPos -> x + x].entity = NONE;
+                map -> pixels[y][x].entity = NONE;
             }
         }
         
         *orgPos = newPos;
-        for(int y = -entitySize.y/2; y < entitySize.y / 2; y++)
+        for(int y = newPos.y - entitySize.y/2; y <= newPos.y + entitySize.y / 2; y++)
         {
-            for(int x = -entitySize.x/2; x < entitySize.x / 2; x++)
+            for(int x = newPos.x - entitySize.x/2; x <= newPos.x + entitySize.x / 2; x++)
             {
-                map -> pixels[newPos.y + y][newPos.x + x].entity = entity;
+                map -> pixels[y][x].entity = entity;
             }
         }
     }

@@ -52,7 +52,7 @@ void MovePlayer(Player *player, Map *map, char input)
             newPos.x -= 2; //아래까지 실행되며 newPos는 최종적으로 -1이 가해진 값
         case 'd':
             newPos.x += 1;
-            Interaction(player -> position, newPos, player -> size,  PLAYER, map);
+            Interaction(&player -> position, newPos, player -> size,  PLAYER, map);
             break;
         case ' ':
             Jump(player);
@@ -73,7 +73,7 @@ void Jumping(Player *player, Map *map) {
         newPos.y += jumpOffsets[player -> jumpIndex];
         player->jumpIndex++;
         
-        Interaction(player -> position, newPos, PLAYER, map);
+        Interaction(&player -> position, player -> size, newPos, PLAYER, map);
         
         if (player -> jumpIndex >= JUMP_FRAMES - 1) {
             player -> jumpIndex = 0;

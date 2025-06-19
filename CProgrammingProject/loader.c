@@ -40,35 +40,38 @@ void LoadFromFile(FILE *fp, Position size, LoadContent content, Entity type)
 
 void ToMap(char c, Map *map, Position loc)
 {
-    if(loc.y > size.y)
+    switch(loc.y / size.y)
     {
-        fprintf(stderr, "ERR: Saved map format is not valid!\n");
-        exit(2);
+        case 0:
+            map -> pixels[loc.x][loc.y].c = c;
+            break;
+        case 1:
+            break;
+        default:
+            fprintf(stderr, "ERR: Saved map format is not valid!\n");
+            exit(2);
     }
-    map -> pixels[loc.x][loc.y].c = c;
 }
 
 void ToPlayerIdle(char c, Player *player, Position loc)
 {
-    if(loc.y > player -> size.y * 3)
-    {
-        fprintf(stderr, "ERR: Saved player format is not valid!\n");
-        exit(2);
-    }
+    int animIndex = loc.y / player -> size.y;
     
-    switch(loc.y / player -> size.y)
+    switch(animIndex)
     {
         case 0:
             player -> anim.idle[loc.x][loc.y] = c;
             break;
         case 1:
-            loc.y -= player -> size.y;
-            player -> anim.anim[0][loc.x][loc.y] = c;
-            break;
+            loc.y += player -> size.y;
         case 2:
-            loc.y -= player -> size.y * 2;
-            player -> anim.anim[1][loc.x][loc.y] = c;
-            break;
+            loc.y += player -> size.y;
+        case 3:
+            loc.y -= player -> size.y * 3;
+            player -> anim.anim[animIndex][loc.x][loc.y] = c;
+        default:
+            fprintf(stderr, "ERR: Saved player format is not valid!\n");
+            exit(2);
     }
 }
 
