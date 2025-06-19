@@ -46,7 +46,10 @@ void ToMap(char c, Map *map, Position loc)
             map -> pixels[loc.y][loc.x].c = c;
             break;
         case 1:
-            map -> pixels[loc.y][loc.x].entity = TERRAIN;
+            if(c != ' ')
+            {
+                map -> pixels[loc.y][loc.x].entity = TERRAIN;
+            }
             break;
         default:
             fprintf(stderr, "ERR: Saved map format is not valid!\n");
