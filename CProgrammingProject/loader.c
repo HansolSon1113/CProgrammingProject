@@ -43,9 +43,10 @@ void ToMap(char c, Map *map, Position loc)
     switch(loc.y / size.y)
     {
         case 0:
-            map -> pixels[loc.x][loc.y].c = c;
+            map -> pixels[loc.y][loc.x].c = c;
             break;
         case 1:
+            map -> pixels[loc.y][loc.x].entity = TERRAIN;
             break;
         default:
             fprintf(stderr, "ERR: Saved map format is not valid!\n");
@@ -60,7 +61,7 @@ void ToPlayerIdle(char c, Player *player, Position loc)
     switch(animIndex)
     {
         case 0:
-            player -> anim.idle[loc.x][loc.y] = c;
+            player -> anim.idle[loc.y][loc.x] = c;
             break;
         case 1:
             loc.y += player -> size.y;
@@ -68,7 +69,7 @@ void ToPlayerIdle(char c, Player *player, Position loc)
             loc.y += player -> size.y;
         case 3:
             loc.y -= player -> size.y * 3;
-            player -> anim.anim[animIndex][loc.x][loc.y] = c;
+            player -> anim.anim[animIndex][loc.y][loc.x] = c;
         default:
             fprintf(stderr, "ERR: Saved player format is not valid!\n");
             exit(2);
