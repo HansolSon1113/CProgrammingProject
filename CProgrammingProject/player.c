@@ -15,7 +15,7 @@
 Player* MakePlayer(void)
 {
     Player *player = (Player *)malloc(sizeof(Player));
-    Position pos = {0, 0};
+    Position pos = {3, 3};
     Position size = {5, 5};
     
     FILE *fp = fopen("player.txt", "r");

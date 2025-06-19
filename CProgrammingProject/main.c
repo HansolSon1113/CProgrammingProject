@@ -234,6 +234,8 @@ Frame GenerateFrame(const Pixel **pixels, const Player *player, const EnemyArray
         }
     }
     
+    char text[] = "";
+    
     Frame frame = { screen, NULL };
     
     return frame;
