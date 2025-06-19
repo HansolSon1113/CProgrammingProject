@@ -10,6 +10,7 @@
 
 #include "player.h"
 #include "entities.h"
+#include "map.h"
 
 #define CheckScreenBoundary(pos, entitySize, screenSize) ( \
     ( (pos).x < (entitySize).x / 2 + 1 ) || \

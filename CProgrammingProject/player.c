@@ -10,17 +10,37 @@
 #include <stdio.h>
 #include "pixel.h"
 #include "map.h"
+#include "loader.h"
 
-Player MakePlayer(void)
+Player* MakePlayer(void)
 {
-    Player player = {{0, 0}, 100, 10, NULL, 0};
+    Player *player = (Player *)malloc(sizeof(Player));
+    Position pos = {0, 0};
+    Position size = {5, 5};
+    
+    FILE *fp = fopen("player.txt", "r");
+    
+    if(player == NULL || fp == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for player!\n");
+        exit(1);
+    }
+    
+    player -> position = pos;
+    player -> size = size;
+    player -> jumpIndex = 0;
+    
+    LoadContent loadContent;
+    loadContent.player = player;
+    LoadFromFile(fp, size, loadContent, PLAYER);
+    
     return player;
 }
 
 // Apply input to position
 void MovePlayer(Player *player, Map *map, char input)
 {
-    if(map -> pixels[size.x * (player -> position.y + 1) + player -> position.x].entity == NONE)
+    if(map -> pixels[player -> position.y - player -> size.y - 1][player -> position.x].entity == NONE)
     {
         player -> position.y--;
     }
@@ -58,8 +78,5 @@ void Jumping(Player *player, Map *map) {
         if (player -> jumpIndex >= JUMP_FRAMES - 1) {
             player -> jumpIndex = 0;
         }
-    }
-    if(map -> pixels[(player -> position.y - 1) * size.x + player -> position.x].entity == NONE) {
-        player -> position.y--;
     }
 }

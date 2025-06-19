@@ -13,4 +13,10 @@ typedef enum
     PLAYER, ENEMY, TERRAIN, NONE
 } Entity;
 
+typedef struct
+{
+    char **idle;
+    char **anim[];
+} Animation;
+
 #endif

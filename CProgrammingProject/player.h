@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "pixel.h"
 #include "map.h"
+#include "loader.h"
 
 // Item
 typedef struct
@@ -31,6 +32,7 @@ typedef struct
 {
     Position position;
     Position size;
+    Animation anim;
     int health;
     int damage;
     ItemArray items;
@@ -40,7 +42,7 @@ typedef struct
 const int JUMP_FRAMES = 8;
 const int jumpOffsets[JUMP_FRAMES] = {0, 3, 2, 1, 0, -1, -2, -3};
 
-Player MakePlayer(void);
+Player* MakePlayer(void);
 void MovePlayer(Player *player, Map *map, char input);
 void Jump(Player *player);
 void Jumping(Player *player, Map *map);

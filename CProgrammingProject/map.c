@@ -10,11 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pixel.h"
+#include "loader.h"
+#include "entities.h"
 
 Map *LoadMap(void)
 {
     Map *map = (Map *)malloc(sizeof(Map));
-    map -> pixels = malloc(sizeof(Pixel) * (size.x + 1) * size.y + 1);
+    map -> pixels = malloc(sizeof(Pixel) * size.x * size.y);
     FILE *fp;
     fp = fopen("map.txt", "r");
     if (map == NULL || map -> pixels == NULL || fp == NULL)
@@ -23,14 +25,9 @@ Map *LoadMap(void)
         exit(EXIT_FAILURE);
     }
     
-    size_t total = (size.x + 1) * size.y;
-    for (size_t i = 0; i < total; i++) {
-        if (fread(&map -> pixels[i].c, sizeof(char), 1, fp) != 1) {
-            break;
-        }
-    }
-    fclose(fp);
-    map -> pixels[total].c = '\0';
+    LoadContent content;
+    content.map = map;
+    LoadFromFile(fp, size, content, TERRAIN);
     
     return map;
 }

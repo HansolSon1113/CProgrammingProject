@@ -11,10 +11,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "pixel.h"
+#include "loader.h"
+#include "entities.h"
 
 // Map and items on the map
 typedef struct {
-    Pixel *pixels;
+    Pixel **pixels;
 } Map;
 
 Map *LoadMap(void);

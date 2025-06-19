@@ -9,18 +9,19 @@
 
 #include "player.h"
 #include "entities.h"
+#include "map.h"
 
 void Interaction(Position *orgPos, Position newPos, Position entitySize, Entity entity, Map *map)
 {
     if(CheckScreenBoundary(newPos, entitySize, size)) return;
     
-    if(map -> pixels[(size.x * newPos.y) + newPos.x].entity == NONE)
+    if(map -> pixels[newPos.y][newPos.x].entity == NONE)
     {
         for(int y = -entitySize.y/2; y < entitySize.y / 2; y++)
         {
             for(int x = -entitySize.x/2; x < entitySize.x / 2; x++)
             {
-                map -> pixels[(size.x * (orgPos -> y + y)) + (orgPos -> x + x)].entity = NONE;
+                map -> pixels[orgPos -> y + y][orgPos -> x + x].entity = NONE;
             }
         }
         
@@ -29,7 +30,7 @@ void Interaction(Position *orgPos, Position newPos, Position entitySize, Entity 
         {
             for(int x = -entitySize.x/2; x < entitySize.x / 2; x++)
             {
-                map -> pixels[(size.x * (newPos.y + y)) + (newPos.x + x)].entity = entity;
+                map -> pixels[newPos.y + y][newPos.x + x].entity = entity;
             }
         }
     }
