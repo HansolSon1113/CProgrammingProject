@@ -7,7 +7,6 @@
 
 #include "pixel.h"
 
-#include "player.h"
 #include "entities.h"
 #include "map.h"
 

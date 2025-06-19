@@ -8,9 +8,9 @@
 #include "player.h"
 
 #include <stdio.h>
-#include "pixel.h"
-#include "map.h"
+#include <stdlib.h>
 #include "loader.h"
+#include "map.h"
 
 Player* MakePlayer(void)
 {

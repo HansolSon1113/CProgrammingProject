@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include "pixel.h"
 #include "loader.h"
-#include "entities.h"
 
 Map *LoadMap(void)
 {
@@ -22,7 +21,7 @@ Map *LoadMap(void)
     if (map == NULL || map -> pixels == NULL || fp == NULL)
     {
         fprintf(stderr, "ERR: Failed to load Map!\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
     
     LoadContent content;

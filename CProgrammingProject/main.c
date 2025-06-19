@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <windows.h>
 #include <player.h>
 #include <pixel.h>
 #include <map.h>
+#include <bool.h>
+#include <score.h>
 
 // Image to print on screen.
 typedef struct
@@ -36,13 +39,6 @@ typedef enum
     QUIT
 } MainMenu;
 
-//BOOLEAN
-typedef enum
-{
-    false,
-    true
-} bool;
-
 bool Lobby(void);
 bool LobbyExit(MainMenu selection);
 EnemyArray MakeEnemies(void);
@@ -54,7 +50,7 @@ Frame GenerateFrame(const Pixel **pixels, const Player *player, const EnemyArray
 void UpdateScreen(const Frame *frame);
 
 //Size of the screen
-extern const Position size;
+const Position size = {10, 10};
 
 double deltaTime;
 const double fixedDeltaTime = 1000.0 / 60.0;
@@ -68,8 +64,10 @@ bool Lobby(void)
     if(screen == NULL)
     {
         fprintf(stderr, "ERR: Failed to allocate memory for screen!\n");
-        exit(EXIT_FAILURE);
+        exit(1);
     }
+    
+    Score *score = ReadScores();
     
     while (true)
     {
@@ -199,7 +197,7 @@ void MoveEnemy(EnemyArray *enemies)
 // Combine all entities, map, screen border and return
 Frame GenerateFrame(const Pixel **pixels, const Player *player, const EnemyArray *enemies)
 {
-    char **screen = malloc(sizeof(char) * size.x * size.y);
+    char **screen = (char **)malloc(sizeof(char) * size.x * size.y);
     if(screen == NULL)
     {
         fprintf(stderr, "ERR: Failed to allocate memory for screen!\n");

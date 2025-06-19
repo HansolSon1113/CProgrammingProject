@@ -9,12 +9,14 @@
 #define PLAYER_H
 
 #include <stdio.h>
-#include "pixel.h"
-#include "map.h"
+#include <stdlib.h>
 #include "loader.h"
+#include "map.h"
+
+typedef struct Map Map;
 
 // Item
-typedef struct
+typedef struct Item
 {
     int barrier;
     float damageMultiplier;
@@ -28,7 +30,7 @@ typedef struct
 } ItemArray;
 
 // Player
-typedef struct
+typedef struct Player
 {
     Position position;
     Position size;

@@ -10,8 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "map.h"
-#include "entities.h"
-#include "pixel.h"
+#include "player.h"
 
 void LoadFromFile(FILE *fp, Position size, LoadContent content, Entity type)
 {

@@ -10,9 +10,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "map.h"
 #include "entities.h"
 #include "pixel.h"
+
+typedef struct Map Map;
+typedef struct Player Player;
 
 typedef union {
     Map *map;

@@ -8,9 +8,10 @@
 #ifndef PIXEL_H
 #define PIXEL_H
 
-#include "player.h"
 #include "entities.h"
-#include "map.h"
+
+typedef struct Map Map;
+typedef struct Item Item;
 
 #define CheckScreenBoundary(pos, entitySize, screenSize) ( \
     ( (pos).x < (entitySize).x / 2 + 1 ) || \
@@ -30,10 +31,11 @@ typedef struct
 {
     char c;
     Entity entity;
-    Item item;
+    Item *item;
 } Pixel;
 
-const Position size = {10, 10};
+extern const Position size;
+
 
 void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map); //이동할때 빈자리 검증하는거 여기로 옮기기
 

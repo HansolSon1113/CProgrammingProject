@@ -12,10 +12,10 @@
 #include <stdlib.h>
 #include "pixel.h"
 #include "loader.h"
-#include "entities.h"
 
 // Map and items on the map
-typedef struct {
+typedef struct Map
+{
     Pixel **pixels;
 } Map;
 
