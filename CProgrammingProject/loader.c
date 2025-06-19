@@ -57,7 +57,7 @@ void ToMap(char c, Map *map, Position loc)
     }
 }
 
-void ToPlayerIdle(char c, Player *player, Position loc)
+void ToPlayer(char c, Player *player, Position loc)
 {
     int animIndex = loc.y / player -> size.y;
     
