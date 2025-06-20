@@ -1,10 +1,3 @@
-//
-//  score.h
-//  CProgrammingProject
-//
-//  Created by 한솔 on 6/19/25.
-//
-
 #ifndef SCORE_H
 #define SCORE_H
 

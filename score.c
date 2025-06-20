@@ -1,10 +1,3 @@
-//
-//  score.c
-//  CProgrammingProject
-//
-//  Created by 한솔 on 6/19/25.
-//
-
 #include "score.h"
 
 #include <stdio.h>
@@ -54,7 +47,9 @@ Score *FindScore(Score *head, char *name)
 
 Score *ReadScores(void)
 {
-    FILE *fp = fopen("scores.bin", "rb");
+    FILE *fp = fopen("scores.bin", "ab");
+
+    fp = fopen("scores.bin", "rb");
     if(fp == NULL)
     {
         fprintf(stderr, "ERR: Failed to open saved scores!\n");

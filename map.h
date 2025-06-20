@@ -1,10 +1,3 @@
-//
-//  map.h
-//  CProgrammingProject
-//
-//  Created by 한솔 on 6/2/25.
-//
-
 #ifndef MAP_H
 #define MAP_H
 
@@ -17,6 +10,7 @@
 typedef struct Map
 {
     Pixel **pixels;
+    Position size;
 } Map;
 
 Map *LoadMap(void);

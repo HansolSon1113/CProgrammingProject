@@ -1,10 +1,3 @@
-//
-//  pixel.h
-//  CProgrammingProject
-//
-//  Created by 한솔 on 6/2/25.
-//
-
 #ifndef PIXEL_H
 #define PIXEL_H
 
@@ -37,6 +30,6 @@ typedef struct
 extern const Position size;
 
 
-void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map); //이동할때 빈자리 검증하는거 여기로 옮기기
+void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map);
 
 #endif

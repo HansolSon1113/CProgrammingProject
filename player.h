@@ -1,10 +1,3 @@
-//
-//  player.h
-//  CProgrammingProject
-//
-//  Created by 한솔 on 6/2/25.
-//
-
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -12,6 +5,9 @@
 #include <stdlib.h>
 #include "loader.h"
 #include "map.h"
+
+#define JUMP_FRAMES 8
+#define PLAYER_ANIM_FRAME 3
 
 typedef struct Map Map;
 
@@ -29,6 +25,12 @@ typedef struct
     size_t size;
 } ItemArray;
 
+typedef enum
+{
+    LEFT = -1,
+    RIGHT = 1
+} Direction;
+
 // Player
 typedef struct Player
 {
@@ -39,10 +41,8 @@ typedef struct Player
     int damage;
     ItemArray items;
     int jumpIndex;
+    Direction dir;
 } Player;
-
-const int JUMP_FRAMES = 8;
-const int jumpOffsets[JUMP_FRAMES] = {0, 3, 2, 1, 0, -1, -2, -3};
 
 Player* MakePlayer(void);
 void MovePlayer(Player *player, Map *map, char input);
