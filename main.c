@@ -19,21 +19,6 @@ typedef struct
     char *text;
 } Frame;
 
-// Enemy
-typedef struct
-{
-    Position position;
-    int health;
-    int damage;
-} Enemy;
-
-// Enemies and size of array with enemies
-typedef struct
-{
-    Enemy *enemy;
-    size_t size;
-} EnemyArray;
-
 // Main Menu Value
 typedef enum
 {
@@ -49,10 +34,8 @@ void PrintLobby(MainMenu selection);
 void ShowSettings(void);
 void AdjustMusicVolume(void);
 void ShowRanking(void);
-EnemyArray *MakeEnemies(void);
 void InGame(bool playing);
 char GetInput(void);
-void MoveEnemy(EnemyArray *enemies);
 void Battle(Player *player, Enemy *enemy);
 Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enemies);
 void UpdateScreen(const Frame *frame);
@@ -185,9 +168,9 @@ void AdjustMusicVolume(void)
         }
 
         input = GetInput();
-        if ((input == 'a' || input == 'w') && musicVolume > 0)
+        if ((input == 'a' || input == 'w') && musicVolume <= 900)
             musicVolume += 100;
-        else if ((input == 'd' || input == 's') && musicVolume < 10)
+        else if ((input == 'd' || input == 's') && musicVolume >= 100)
             musicVolume -= 100;
         else if (input == '\r')
         {
@@ -319,19 +302,6 @@ bool LobbyExit(MainMenu selection)
     }
 }
 
-EnemyArray *MakeEnemies(void)
-{
-    EnemyArray *enemyArray = (EnemyArray *)malloc(sizeof(EnemyArray));
-    if (enemyArray == NULL)
-    {
-        fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
-        exit(1);
-    }
-
-    enemyArray->size = 0;
-    return enemyArray;
-}
-
 int main(void)
 {
     CONSOLE_CURSOR_INFO cursorInfo = {
@@ -374,7 +344,7 @@ void InGame(bool playing)
     fflush(stdout);
 #endif
     Player *player = MakePlayer();
-    EnemyArray *enemies = MakeEnemies();
+    EnemyArray *enemies = MakeEnemies(6, map);
 
     StartBgm("sounds/nightmare.wav");
 
@@ -424,7 +394,7 @@ void InGame(bool playing)
         printf("Moving Enemies...\n");
         fflush(stdout);
 #endif
-        MoveEnemy(enemies);
+        MoveEnemy(enemies, map);
 
 #ifdef DEBUG
         printf("End of Frame...\n");
@@ -441,7 +411,8 @@ void InGame(bool playing)
         {
             Sleep((DWORD)(fixedDeltaTime - deltaTime));
         }
-        playTime += (deltaTime > fixedDeltaTime) ? deltaTime : fixedDeltaTime;
+        double passedTime = (deltaTime > fixedDeltaTime) ? deltaTime : fixedDeltaTime;
+        playTime += passedTime;
     }
 
     StopBgm();
@@ -476,6 +447,13 @@ void InGame(bool playing)
     }
     free(player->anim.anim);
     free(player);
+    for (int y = 0; y < enemies->enemies[0].size.y; y++)
+    {
+        free(enemies->sprite[y]);
+    }
+    free(enemies->sprite);
+    free(enemies->enemies);
+    free(enemies);
 }
 
 // Returns input when keyboard clicked
@@ -487,18 +465,6 @@ char GetInput(void)
     }
 
     return '\0';
-}
-
-// Apply random movement to enemy position
-void MoveEnemy(EnemyArray *enemies)
-{
-    for (int i = 0; i < enemies->size; i++)
-    {
-        int x = rand() % 2 - 1, y = rand() % 2 - 1;
-
-        enemies->enemy[i].position.x += x;
-        enemies->enemy[i].position.y += y;
-    }
 }
 
 // Combine all entities, map, screen border and return
@@ -575,6 +541,28 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
             }
         }
     }
+
+    for (int i = 0; i < enemies->size; i++)
+    {
+        Position enemyToScreenPos = {
+            enemies->enemies[i].position.x - enemies->enemies[i].size.x / 2,
+            enemies->enemies[i].position.y - enemies->enemies[i].size.y / 2
+        };
+
+        for(int y = 0; y < enemies->enemies[i].size.y; y++)
+        {
+            int Y = enemyToScreenPos.y - printPos.y + y;
+            if(Y < 0 || Y >= size.y) continue;
+            for(int x = 0; x < enemies->enemies[i].size.x; x++)
+            {
+                int X = enemyToScreenPos.x - printPos.x + x;
+                if(X < 0 || X >= size.x) continue;
+
+                screen[Y][X] = enemies->sprite[y][x];
+            }
+        }
+    }
+
 
     if (player != NULL)
     {

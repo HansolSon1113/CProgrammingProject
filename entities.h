@@ -3,7 +3,7 @@
 
 typedef enum
 {
-    PLAYER, ENEMY, TERRAIN, NONE, CLEAR
+    PLAYER, ENEMY, TERRAIN, DAMAGE_AREA, NONE, CLEAR
 } Entity;
 
 typedef struct

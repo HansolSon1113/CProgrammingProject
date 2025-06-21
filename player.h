@@ -43,11 +43,30 @@ typedef struct Player
     ItemArray items;
     int jumpIndex;
     Direction dir;
+    bool alreadyDamaged;
 } Player;
+
+// Enemy
+typedef struct
+{
+    Position position;
+    Position size;
+} Enemy;
+
+// Enemies and size of array with enemies
+typedef struct EnemyArray
+{
+    Enemy *enemies;
+    size_t size;
+    char **sprite;
+} EnemyArray;
 
 Player* MakePlayer(void);
 bool MovePlayer(Player *player, Map *map, Keys input);
 void Jump(Player *player);
 void Jumping(Player *player, Map *map);
+
+EnemyArray *MakeEnemies(int enemyCount, Map *map);
+void MoveEnemy(EnemyArray *enemies, Map *map);
 
 #endif

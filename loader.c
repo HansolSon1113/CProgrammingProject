@@ -30,6 +30,9 @@ void LoadFromFile(FILE *fp, LoadContent content, Entity type)
                 case PLAYER:
                     ToPlayer(c, content.player, location);
                     break;
+                case ENEMY:
+                    ToEnemy(c, content.enemyArray, location);
+                    break;
                 }
             }
         }
@@ -53,6 +56,10 @@ void ToMap(char c, Map *map, Position loc)
         else if (c == 'C')
         {
             map->pixels[loc.y][loc.x].entity = CLEAR;
+        }
+        else if (c == '^')
+        {
+            map->pixels[loc.y][loc.x].entity = DAMAGE_AREA;
         }
         else
         {
@@ -96,4 +103,7 @@ void ToPlayer(char c, Player *player, Position loc)
     }
 }
 
-// void LoadEnemy(size_t size);
+void ToEnemy(char c, EnemyArray *enemyArray, Position loc)
+{
+    enemyArray->sprite[loc.y][loc.x] = c;
+}

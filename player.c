@@ -73,6 +73,9 @@ Player *MakePlayer(void)
     player->size = size;
     player->jumpIndex = 0;
     player->dir = LEFT;
+    player->health = 10;
+    player->damage = 1;
+    player->alreadyDamaged = false;
 
     LoadContent loadContent;
     loadContent.player = player;
@@ -88,22 +91,48 @@ bool MovePlayer(Player *player, Map *map, Keys input)
     if (input.left)
     {
         newPos.x -= 1;
-        Interaction(&player->position, newPos, player->size, PLAYER, map);
         player->dir = LEFT;
     }
     else if (input.right)
     {
         newPos.x += 1;
         player->dir = RIGHT;
-        Interaction(&player->position, newPos, player->size, PLAYER, map);
     }
+
+    bool withEnemy = false;
+    for (int y = newPos.y - player->size.y / 2; y <= newPos.y + player->size.y / 2 && player->alreadyDamaged == true && withEnemy == false; y++)
+    {
+        for (int x = newPos.x - player->size.x / 2; x <= newPos.x + player->size.x / 2; x++)
+        {
+            if (map->pixels[y][x].entity == ENEMY || map->pixels[y][x].entity == DAMAGE_AREA)
+            {
+                withEnemy = true;
+            }
+        }
+    }
+    player->alreadyDamaged = withEnemy;
+
+    for (int y = newPos.y - player->size.y / 2; y <= newPos.y + player->size.y / 2 && player->alreadyDamaged == false; y++)
+    {
+        for (int x = newPos.x - player->size.x / 2; x <= newPos.x + player->size.x / 2; x++)
+        {
+            if ((map->pixels[y][x].entity == ENEMY || map->pixels[y][x].entity == DAMAGE_AREA) && player->alreadyDamaged == false)
+            {
+                player->health -= 1;
+                player->alreadyDamaged = true;
+                break;
+            }
+        }
+    }
+
+    Interaction(&player->position, newPos, player->size, PLAYER, map);
 
     if (input.jump)
     {
         Jump(player);
     }
 
-    if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR)
+    if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR || player->health <= 0)
     {
         return false;
     }
@@ -137,5 +166,94 @@ void Jumping(Player *player, Map *map)
         {
             player->jumpIndex = 0;
         }
+    }
+}
+
+EnemyArray *MakeEnemies(int enemyCount, Map *map)
+{
+    FILE *fp = fopen("enemy.txt", "r");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to open enemy file!\n");
+        exit(1);
+    }
+
+    EnemyArray *enemyArray = (EnemyArray *)malloc(sizeof(EnemyArray));
+    if (enemyArray == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
+        exit(1);
+    }
+    enemyArray->size = enemyCount;
+    enemyArray->enemies = (Enemy *)malloc(sizeof(Enemy) * enemyCount);
+    if (enemyArray->enemies == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
+        exit(1);
+    }
+    enemyArray->sprite = (char **)malloc(sizeof(char *) * 5);
+    if (enemyArray->sprite == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
+        exit(1);
+    }
+    for (int y = 0; y < 5; y++)
+    {
+        enemyArray->sprite[y] = (char *)malloc(sizeof(char) * 7);
+        if (enemyArray->sprite[y] == NULL)
+        {
+            fprintf(stderr, "ERR: Failed to allocate memory for enemy array!\n");
+            exit(1);
+        }
+    }
+
+    LoadContent content;
+    content.enemyArray = enemyArray;
+
+    LoadFromFile(fp, content, ENEMY);
+
+    for (int i = 0; i < enemyCount; i++)
+    {
+        int X, Y;
+        bool b = false;
+        do
+        {
+            b = false;
+            X = rand() % (map->size.x - 6) + 3, Y = rand() % (map->size.y - 4) + 2;
+
+            for (int y = Y - 2; y <= Y + 2 && !b; y++)
+            {
+                for (int x = X - 3; x <= X + 3; x++)
+                {
+                    if (map->pixels[y][x].entity != NONE)
+                    {
+                        b = true;
+                        break;
+                    }
+                }
+            }
+        } while (b);
+
+        enemyArray->enemies[i].position.x = X;
+        enemyArray->enemies[i].position.y = Y;
+
+        enemyArray->enemies[i].size.x = 7;
+        enemyArray->enemies[i].size.y = 5;
+    }
+
+    return enemyArray;
+}
+
+// Apply random movement to enemy position
+void MoveEnemy(EnemyArray *enemies, Map *map)
+{
+    for (int i = 0; i < enemies->size; i++)
+    {
+        int x = rand() % 3 - 1;
+        Position newPos = {enemies->enemies[i].position.x + x, enemies->enemies[i].position.y};
+        Interaction(&enemies->enemies[i].position, newPos, enemies->enemies[i].size, ENEMY, map);
+
+        Position goDown = {enemies->enemies[i].position.x, enemies->enemies[i].position.y + 1};
+        Interaction(&enemies->enemies[i].position, goDown, enemies->enemies[i].size, ENEMY, map);
     }
 }
