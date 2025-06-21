@@ -10,7 +10,7 @@ DWORD WINAPI BgmThread(void *arg)
     const char *path = arg; // mp3 · wav 모두 가능
     char cmd[128];
 
-    sprintf(cmd, "open \"%s\" type waveaudio alias bgm", path);
+    sprintf(cmd, "open \"%s\" type mpegvideo alias bgm", path);
     if (mciSendStringA(cmd, NULL, 0, NULL))
         return 0;
 
@@ -67,7 +67,7 @@ static void LoadWav(const char *path, WavData *out)
 
 void InitAudio(void)
 {
-    LoadWav("sounds/jump.wav", &walkSound);
+    LoadWav("sounds/walk.wav", &walkSound);
     LoadWav("sounds/selection.wav", &selectionSound);
 }
 

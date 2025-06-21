@@ -85,7 +85,7 @@ void PrintLobby(MainMenu selection)
     int centerY = (height - 6) / 2;   // 메뉴 줄 수 6줄
 
     Gotoxy(centerX, centerY++);
-    printf("================================ C GAME ===================================");
+    printf("============================= Going Home.. ================================");
     
     const char *menu[] = { "START", "SETTINGS", "RANKING", "QUIT" };
     centerY += 2;  // 수동 줄 띄우기
