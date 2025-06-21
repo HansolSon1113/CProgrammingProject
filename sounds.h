@@ -16,7 +16,7 @@ typedef struct
 void SetVolume(int volume);
 void StartBgm(const char *path);
 void StopBgm(void);
-void PlayWalk(void);
 void InitAudio(void);
+void CloseAudio(void);
 
 #endif

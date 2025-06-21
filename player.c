@@ -73,7 +73,7 @@ Player *MakePlayer(void)
     player->size = size;
     player->jumpIndex = 0;
     player->dir = LEFT;
-    player->health = 10;
+    player->health = 20;
     player->damage = 1;
     player->alreadyDamaged = false;
 
@@ -135,7 +135,7 @@ bool MovePlayer(Player *player, Map *map, Keys input)
     if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR || player->health <= 0)
     {
         ShowResult(player);
-        return false;  // 게임 종료
+        return false; // 게임 종료
     }
 
     return true;
@@ -152,8 +152,8 @@ void Jump(Player *player)
 
 void Jumping(Player *player, Map *map)
 {
-    Position goDown = {player->position.x, player->position.y + 1};
-    Interaction(&player->position, goDown, player->size, PLAYER, map);
+    Position newPos = {player->position.x, player->position.y + 1};
+    Interaction(&player->position, newPos, player->size, PLAYER, map);
 
     if (player->jumpIndex)
     {

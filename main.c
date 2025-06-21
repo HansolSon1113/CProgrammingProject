@@ -38,7 +38,6 @@ void AdjustMusicVolume(void);
 void ShowRanking(void);
 void InGame(bool playing);
 char GetInput(void);
-void Battle(Player *player, Enemy *enemy);
 Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enemies);
 void UpdateScreen(const Frame *frame);
 
@@ -204,7 +203,7 @@ void ShowRanking(void)
 // Lobby
 bool Lobby(void)
 {
-    SetVolume(500);
+    SetVolume(musicVolume);
     InitAudio();
     StartBgm("sounds/lobby.wav");
 #ifdef DEBUG
@@ -347,6 +346,7 @@ void InGame(bool playing)
     EnemyArray *enemies = MakeEnemies(6, map);
 
     StartBgm("sounds/nightmare.wav");
+    SetVolume(musicVolume);
 
 #ifdef DEBUG
     printf("Entering Loop...\n");
@@ -416,11 +416,13 @@ void InGame(bool playing)
     }
 
     StopBgm();
+    CloseAudio();
 
     for (int y = 0; y < size.y; y++)
     {
         free(map->pixels[y]);
     }
+    free(map->pixels);
     free(map);
     for (int y = 0; y < player->size.y; y++)
     {
@@ -437,7 +439,7 @@ void InGame(bool playing)
     {
         for (int i = 0; i < PLAYER_ANIM_FRAME; i++)
         {
-            for (int y = 0; y < size.y; y++)
+            for (int y = 0; y < player->size.y; y++)
             {
                 free(player->anim.anim[t][i][y]);
             }
