@@ -6,7 +6,7 @@
 #include "loader.h"
 #include "map.h"
 
-#define JUMP_FRAMES 8
+#define JUMP_FRAMES 10
 #define PLAYER_ANIM_FRAME 3
 
 typedef struct Map Map;

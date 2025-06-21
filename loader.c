@@ -46,13 +46,17 @@ void ToMap(char c, Map *map, Position loc)
         break;
     case 1:
         loc.y -= map->size.y;
-        if (c != ' ')
+        if (c == ' ')
         {
-            map->pixels[loc.y][loc.x].entity = TERRAIN;
+            map->pixels[loc.y][loc.x].entity = NONE;
         }
         else if (c == 'C')
         {
             map->pixels[loc.y][loc.x].entity = CLEAR;
+        }
+        else
+        {
+            map->pixels[loc.y][loc.x].entity = TERRAIN;
         }
         break;
     default:
@@ -76,7 +80,15 @@ void ToPlayer(char c, Player *player, Position loc)
         loc.y += player->size.y;
     case 3:
         loc.y -= player->size.y * 3;
-        player->anim.anim[animIndex - 1][loc.y][loc.x] = c;
+        player->anim.anim[0][animIndex - 1][loc.y][loc.x] = c;
+        break;
+    case 4:
+        loc.y += player->size.y;
+    case 5:
+        loc.y += player->size.y;
+    case 6:
+        loc.y -= player->size.y * 6;
+        player->anim.anim[1][animIndex - 4][loc.y][loc.x] = c;
         break;
     default:
         fprintf(stderr, "ERR: Saved player format is not valid!\n");

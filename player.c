@@ -5,13 +5,13 @@
 #include "loader.h"
 #include "bool.h"
 
-const int jumpOffsets[JUMP_FRAMES] = {0, -3, -2, -1, 0, 1, 2, 3};
+const int jumpOffsets[JUMP_FRAMES] = {0, -5, -3, -1, 0, 0, 0, 1, 3, 5};
 
 Player *MakePlayer(void)
 {
     Player *player = (Player *)malloc(sizeof(Player));
 
-    Position pos = {4, 4};
+    Position pos = {4, 8};
     Position size = {5, 5};
 
     player->anim.idle = (char **)malloc(sizeof(char *) * size.y);
@@ -30,27 +30,31 @@ Player *MakePlayer(void)
         }
     }
 
-    player->anim.anim = (char ***)malloc(sizeof(char **) * PLAYER_ANIM_FRAME);
+    player->anim.anim = (char ****)malloc(sizeof(char ***) * 2);
     if (player->anim.anim == NULL)
     {
         fprintf(stderr, "ERR: Failed to allocate memory for player animatation!\n");
         exit(1);
     }
-    for (int i = 0; i < PLAYER_ANIM_FRAME; i++)
+    for (int t = 0; t < 2; t++)
     {
-        player->anim.anim[i] = (char **)malloc(sizeof(char *) * size.y);
-        if (player->anim.anim[i] == NULL)
+        player->anim.anim[t] = (char ***)malloc(sizeof(char **) * PLAYER_ANIM_FRAME);
+        for (int i = 0; i < PLAYER_ANIM_FRAME; i++)
         {
-            fprintf(stderr, "ERR: Failed to allocate memory for player animatation!\n");
-            exit(1);
-        }
-        for (int y = 0; y < size.y; y++)
-        {
-            player->anim.anim[i][y] = (char *)malloc(sizeof(char) * size.x);
-            if (player->anim.anim[i][y] == NULL)
+            player->anim.anim[t][i] = (char **)malloc(sizeof(char *) * size.y);
+            if (player->anim.anim[t][i] == NULL)
             {
                 fprintf(stderr, "ERR: Failed to allocate memory for player animatation!\n");
                 exit(1);
+            }
+            for (int y = 0; y < size.y; y++)
+            {
+                player->anim.anim[t][i][y] = (char *)malloc(sizeof(char) * size.x);
+                if (player->anim.anim[t][i][y] == NULL)
+                {
+                    fprintf(stderr, "ERR: Failed to allocate memory for player animatation!\n");
+                    exit(1);
+                }
             }
         }
     }
@@ -78,9 +82,6 @@ Player *MakePlayer(void)
 // Apply input to position
 bool MovePlayer(Player *player, Map *map, char input)
 {
-    Position goDown = {player->position.x, player->position.y + 1};
-    Interaction(&player->position, goDown, player->size, PLAYER, map);
-
     Position newPos = {player->position.x, player->position.y};
     switch (input)
     {
@@ -99,7 +100,7 @@ bool MovePlayer(Player *player, Map *map, char input)
         break;
     }
 
-    if(map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR)
+    if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR)
     {
         return false;
     }
@@ -118,6 +119,9 @@ void Jump(Player *player)
 
 void Jumping(Player *player, Map *map)
 {
+    Position goDown = {player->position.x, player->position.y + 1};
+    Interaction(&player->position, goDown, player->size, PLAYER, map);
+
     if (player->jumpIndex)
     {
         Position newPos = {player->position.x, player->position.y};

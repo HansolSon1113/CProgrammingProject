@@ -168,10 +168,12 @@ EnemyArray *MakeEnemies(void)
 
 int main(void)
 {
-    CONSOLE_CURSOR_INFO cursorInfo = { 0, };
-	cursorInfo.bVisible = 0;
-	cursorInfo.dwSize = 1;
-	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+    CONSOLE_CURSOR_INFO cursorInfo = {
+        0,
+    };
+    cursorInfo.bVisible = 0;
+    cursorInfo.dwSize = 1;
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 
     InGame(Lobby());
 
@@ -319,7 +321,7 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
     }
 
     static Position beforePlayerPos = {-1, -1};
-    static int playerAnimIndex = 0;
+    static int playerAnimIndex = 0, countBeforeAnimChange = 0;
 
     Position half;
     Position printPos;
@@ -329,8 +331,9 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
     {
         half.x = player->size.x / 2;
         half.y = player->size.y / 2;
-        printPos.x = player->position.x - size.x / 2;
-        printPos.y = player->position.y - size.y / 2;
+        int tempX = player->position.x - size.x / 2, tempY = player->position.y - size.y / 2;
+        printPos.x = tempX < map->size.x - size.x ? ((tempX > 0) ? tempX > 0 : 0) : map->size.x - size.x;
+        printPos.y = tempY < map->size.y - size.y ? ((tempY > 0) ? tempY > 0 : 0) : map->size.y - size.y;
         center.x = player->position.x - printPos.x;
         center.y = player->position.y - printPos.y;
 
@@ -379,18 +382,22 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
 
                 Position playerAnimPos = {x + half.x, y + half.y};
 
-                if (beforePlayerPos.x != -1 && beforePlayerPos.y != -1 && beforePlayerPos.x != player->position.x && beforePlayerPos.y != player->position.y)
+                if (beforePlayerPos.x != -1 && beforePlayerPos.y != -1 && beforePlayerPos.x != player->position.x || beforePlayerPos.y != player->position.y)
                 {
                     if (player->dir == LEFT)
                     {
-                        screen[playerToScreenPos.y][playerToScreenPos.x] = player->anim.anim[playerAnimIndex][playerAnimPos.y][playerAnimPos.x];
+                        screen[playerToScreenPos.y][playerToScreenPos.x] = player->anim.anim[0][playerAnimIndex][playerAnimPos.y][playerAnimPos.x];
                     }
                     else
                     {
-                        int flipX = player->size.x - 1 - playerAnimPos.x;
-                        screen[playerToScreenPos.y][playerToScreenPos.x] = player->anim.anim[playerAnimIndex][playerAnimPos.y][flipX];
+                        screen[playerToScreenPos.y][playerToScreenPos.x] = player->anim.anim[1][playerAnimIndex][playerAnimPos.y][playerAnimPos.x];
                     }
-                    playerAnimIndex = (playerAnimIndex + 1) % 3;
+                    countBeforeAnimChange++;
+                    if (countBeforeAnimChange > 60)
+                    {
+                        playerAnimIndex = (playerAnimIndex + 1) % 3;
+                        countBeforeAnimChange = 0;
+                    }
                 }
                 else
                 {
