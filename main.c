@@ -11,6 +11,8 @@
 #include "keys.h"
 #include "bool.h"
 #include "sounds.h"
+#include "result.h"
+
 
 // Image to print on screen.
 typedef struct
@@ -60,10 +62,8 @@ void Gotoxy(int x, int y)
 // Lobby print
 void PrintLobby(MainMenu selection)
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    int height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    int width = size.x;
+    int height = size.y;
 
     int centerX = (width - 74) / 2; // 대략 메뉴 길이 30자
     int centerY = (height - 6) / 2; // 메뉴 줄 수 6줄

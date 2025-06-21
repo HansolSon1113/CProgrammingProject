@@ -134,7 +134,8 @@ bool MovePlayer(Player *player, Map *map, Keys input)
 
     if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR || player->health <= 0)
     {
-        return false;
+        ShowResult(player);
+        return false;  // 게임 종료
     }
 
     return true;
