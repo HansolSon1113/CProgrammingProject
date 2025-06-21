@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "loader.h"
 #include "bool.h"
+#include "keys.h"
 
 const int jumpOffsets[JUMP_FRAMES] = {0, -5, -3, -1, 0, 0, 0, 1, 3, 5};
 
@@ -11,7 +12,7 @@ Player *MakePlayer(void)
 {
     Player *player = (Player *)malloc(sizeof(Player));
 
-    Position pos = {4, 8};
+    Position pos = {40, 8};
     Position size = {5, 5};
 
     player->anim.idle = (char **)malloc(sizeof(char *) * size.y);
@@ -80,24 +81,25 @@ Player *MakePlayer(void)
 }
 
 // Apply input to position
-bool MovePlayer(Player *player, Map *map, char input)
+bool MovePlayer(Player *player, Map *map, Keys input)
 {
     Position newPos = {player->position.x, player->position.y};
-    switch (input)
+    if (input.left)
     {
-    case 'a':
         newPos.x -= 1;
         Interaction(&player->position, newPos, player->size, PLAYER, map);
         player->dir = LEFT;
-        break;
-    case 'd':
+    }
+    else if (input.right)
+    {
         newPos.x += 1;
         player->dir = RIGHT;
         Interaction(&player->position, newPos, player->size, PLAYER, map);
-        break;
-    case ' ':
+    }
+
+    if (input.jump)
+    {
         Jump(player);
-        break;
     }
 
     if (map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR)

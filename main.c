@@ -7,10 +7,10 @@
 #include "player.h"
 #include "pixel.h"
 #include "map.h"
-#include "bool.h"
 #include "score.h"
+#include "keys.h"
+#include "bool.h"
 
-#define DEBUG
 
 // Image to print on screen.
 typedef struct
@@ -238,8 +238,8 @@ void InGame(bool playing)
         printf("Getting Input...\n");
         fflush(stdout);
 #endif
-        char input = GetInput();
-        if (input == 'a' || input == 'd' || input == ' ')
+        Keys input = GetKeys();
+        if (input.left || input.right || input.jump)
         {
 #ifdef DEBUG
             printf("Moving Player...\n");
@@ -332,8 +332,8 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
         half.x = player->size.x / 2;
         half.y = player->size.y / 2;
         int tempX = player->position.x - size.x / 2, tempY = player->position.y - size.y / 2;
-        printPos.x = tempX < map->size.x - size.x ? ((tempX > 0) ? tempX > 0 : 0) : map->size.x - size.x;
-        printPos.y = tempY < map->size.y - size.y ? ((tempY > 0) ? tempY > 0 : 0) : map->size.y - size.y;
+        printPos.x = tempX < map->size.x - size.x ? (tempX > 0 ? tempX : 0) : map->size.x - size.x;
+        printPos.y = tempY < map->size.y - size.y ? (tempY > 0 ? tempY : 0) : map->size.y - size.y;
         center.x = player->position.x - printPos.x;
         center.y = player->position.y - printPos.y;
 

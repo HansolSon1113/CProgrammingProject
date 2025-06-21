@@ -9,7 +9,7 @@ Map *LoadMap(void)
 {
     Map *map = (Map *)malloc(sizeof(Map));
     map->size.x = 800;
-    map->size.y = 15;
+    map->size.y = 18;
     map->pixels = malloc(sizeof(Pixel *) * map->size.y);
 
     FILE *fp;

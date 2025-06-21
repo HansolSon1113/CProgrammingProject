@@ -30,6 +30,6 @@ typedef struct
 extern const Position size;
 
 
-void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map);
+void Interaction(Position *orgPos, Position targetPos, Position size, Entity entity, Map *map);
 
 #endif
