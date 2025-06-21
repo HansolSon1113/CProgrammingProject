@@ -47,7 +47,7 @@ Score *FindScore(Score *head, char *name)
 
 Score *ReadScores(void)
 {
-    FILE *fp = fopen("scores.bin", "ab");
+    FILE *fp;
 
     fp = fopen("scores.bin", "rb");
     if(fp == NULL)
