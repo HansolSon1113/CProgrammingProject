@@ -8,7 +8,6 @@
 #include "keys.h"
 
 #define JUMP_FRAMES 10
-#define PLAYER_ANIM_FRAME 3
 
 typedef struct Map Map;
 typedef enum bool bool;

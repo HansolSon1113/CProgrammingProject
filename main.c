@@ -48,7 +48,7 @@ bool LobbyExit(MainMenu selection);
 void PrintLobby(MainMenu selection);
 void ShowSettings(void);
 void AdjustMusicVolume(void);
-void ShowRanking(void); 
+void ShowRanking(void);
 EnemyArray *MakeEnemies(void);
 void InGame(bool playing);
 char GetInput(void);
@@ -59,21 +59,21 @@ void UpdateScreen(const Frame *frame);
 
 // Size of the screen
 const Position size = {80, 15};
+extern const int PLAYER_ANIM_FRAME;
 
 double deltaTime;
 const double fixedDeltaTime = 1000.0 / 60.0;
 
-//music sound
-int musicVolume = 5; // 0~10 사이 기본값
+// music sound
+int musicVolume = 500; // 0~1000 사이 기본값
 
 void Gotoxy(int x, int y)
 {
-    COORD pos = { x, y };
+    COORD pos = {x, y};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
 }
 
-
-//Lobby print
+// Lobby print
 void PrintLobby(MainMenu selection)
 {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -81,34 +81,34 @@ void PrintLobby(MainMenu selection)
     int width = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     int height = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 
-    int centerX = (width - 74) / 2;   // 대략 메뉴 길이 30자
-    int centerY = (height - 6) / 2;   // 메뉴 줄 수 6줄
+    int centerX = (width - 74) / 2; // 대략 메뉴 길이 30자
+    int centerY = (height - 6) / 2; // 메뉴 줄 수 6줄
 
     Gotoxy(centerX, centerY++);
     printf("============================= Going Home.. ================================");
-    
-    const char *menu[] = { "START", "SETTINGS", "RANKING", "QUIT" };
-    centerY += 2;  // 수동 줄 띄우기
-    for (int i = 0; i < 4; i++) {
+
+    const char *menu[] = {"START", "SETTINGS", "RANKING", "QUIT"};
+    centerY += 2; // 수동 줄 띄우기
+    for (int i = 0; i < 4; i++)
+    {
         char line[50];
         if (i == selection)
-            sprintf(line,"> [%s]", menu[i]);
+            sprintf(line, "> [%s]", menu[i]);
         else
-            sprintf(line,"  %s", menu[i]);
-        Gotoxy((width - strlen(line)) / 2 - 3, centerY++);   
-        printf("%s\n", line); 
+            sprintf(line, "  %s", menu[i]);
+        Gotoxy((width - strlen(line)) / 2 - 3, centerY++);
+        printf("%s\n", line);
     }
-    centerY += 2;  // 수동 줄 띄우기
+    centerY += 2; // 수동 줄 띄우기
     Gotoxy(centerX, centerY++);
     printf("Use A/D to move, Enter to select\n\n");
-
 }
-//settings 화면
+// settings 화면
 void PrintSettings(int selected)
 {
     printf("===== SETTINGS =====\n\n");
 
-    const char *items[2] = { "Adjust Volume", "Back" };
+    const char *items[2] = {"Adjust Volume", "Back"};
     int itemCount = sizeof(items) / sizeof(items[0]);
 
     for (int i = 0; i < itemCount; i++)
@@ -121,16 +121,16 @@ void PrintSettings(int selected)
 
     printf("\na,w/d,s: move  Enter: select  a/d: sound \n");
 }
-//SETTINGS
+// SETTINGS
 void ShowSettings(void)
 {
     int selected = 0;
     char input;
-    int prevSelected = -1;  // 이전 선택 기억
+    int prevSelected = -1; // 이전 선택 기억
 
     while (1)
-    {   
-         if (selected != prevSelected)  // 선택이 바뀌었을 때만 다시 그림
+    {
+        if (selected != prevSelected) // 선택이 바뀌었을 때만 다시 그림
         {
             system("cls");
             PrintSettings(selected);
@@ -141,17 +141,21 @@ void ShowSettings(void)
 
         switch (input)
         {
-        case 'a':case 'w':
-            if (selected > 0) selected--;
+        case 'a':
+        case 'w':
+            if (selected > 0)
+                selected--;
             break;
-        case 'd':case 's':
-            if (selected < 2) selected++;
+        case 'd':
+        case 's':
+            if (selected < 2)
+                selected++;
             break;
-        case '\r':  
+        case '\r':
             if (selected == 0)
             {
                 AdjustMusicVolume();
-                prevSelected = -1;  // 돌아오면 다시 화면 그리기
+                prevSelected = -1; // 돌아오면 다시 화면 그리기
             }
             else if (selected == 1)
             {
@@ -162,33 +166,37 @@ void ShowSettings(void)
     }
 }
 
-//music sound adjust
-void AdjustMusicVolume(void){
+// music sound adjust
+void AdjustMusicVolume(void)
+{
     char input;
-    int prevVolume = -1;  // 이전 볼륨 상태 기억
+    int prevVolume = -1; // 이전 볼륨 상태 기억
 
     while (1)
     {
-        if (musicVolume != prevVolume)  // 볼륨이 바뀌었을 때만 화면 다시 그림
+        if (musicVolume != prevVolume) // 볼륨이 바뀌었을 때만 화면 다시 그림
         {
             system("cls");
             printf("=== Volume Settings ===\n\n");
-            printf("Volume: [%d]\n", musicVolume);
+            printf("Volume: [%d]\n", musicVolume / 10);
             printf("a,w/d,s: Adjust volume, Enter: Go back\n");
             prevVolume = musicVolume;
         }
 
         input = GetInput();
         if ((input == 'a' || input == 'w') && musicVolume > 0)
-            musicVolume--;
+            musicVolume -= 100;
         else if ((input == 'd' || input == 's') && musicVolume < 10)
-            musicVolume++;
+            musicVolume += 100;
         else if (input == '\r')
+        {
+            SetVolume(musicVolume);
             break;
+        }
     }
 }
 
-//RANKING 
+// RANKING
 void ShowRanking(void)
 {
     system("cls");
@@ -198,7 +206,8 @@ void ShowRanking(void)
     Score *cur = head;
 
     int rank = 1;
-    while (cur != NULL) {
+    while (cur != NULL)
+    {
         printf("%d. %s | Time: %.2f sec | HP: %d\n",
                rank++, cur->name, cur->clearTime, cur->clearHealth);
         cur = cur->next;
@@ -257,14 +266,16 @@ bool Lobby(void)
         input = GetInput();
         switch (input)
         {
-        case 'a': case 'w':
+        case 'a':
+        case 'w':
             if (selection > START)
             {
                 PlaySelection();
                 selection--;
             }
             break;
-        case 'd': case 's':
+        case 'd':
+        case 's':
             if (selection < QUIT)
             {
                 PlaySelection();
@@ -293,11 +304,11 @@ bool LobbyExit(MainMenu selection)
     case START:
         return true;
     case SETTINGS:
-        ShowSettings();           // 환경설정 보여주기 함수 호출
-        return Lobby();           // 설정 후 로비로 복귀
+        ShowSettings(); // 환경설정 보여주기 함수 호출
+        return Lobby(); // 설정 후 로비로 복귀
     case RANKING:
-        ShowRanking();            // 순위 보여주기 함수 호출
-        return Lobby();           // 순위 다 본 뒤 로비로 복귀
+        ShowRanking();  // 순위 보여주기 함수 호출
+        return Lobby(); // 순위 다 본 뒤 로비로 복귀
     case QUIT:
         return false;
     default:
@@ -429,6 +440,39 @@ void InGame(bool playing)
             Sleep((DWORD)(fixedDeltaTime - deltaTime));
         }
     }
+
+    StopBgm();
+
+    for (int y = 0; y < size.y; y++)
+    {
+        free(map->pixels[y]);
+    }
+    free(map);
+    for (int y = 0; y < player->size.y; y++)
+    {
+        free(player->anim.idle[y]);
+    }
+    free(player->anim.idle);
+
+    if (player->anim.anim == NULL)
+    {
+        fprintf(stderr, "ERR: Failed to allocate memory for player animatation!\n");
+        exit(1);
+    }
+    for (int t = 0; t < 2; t++)
+    {
+        for (int i = 0; i < PLAYER_ANIM_FRAME; i++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                free(player->anim.anim[t][i][y]);
+            }
+            free(player->anim.anim[t][i]);
+        }
+        free(player->anim.anim[t]);
+    }
+    free(player->anim.anim);
+    free(player);
 }
 
 // Returns input when keyboard clicked
@@ -552,7 +596,6 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
                     {
                         playerAnimIndex = (playerAnimIndex + 1) % 3;
                         countBeforeAnimChange = 0;
-                        PlayWalk();
                     }
                 }
                 else

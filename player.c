@@ -7,6 +7,7 @@
 #include "keys.h"
 
 const int jumpOffsets[JUMP_FRAMES] = {0, -5, -3, -1, 0, 0, 0, 1, 3, 5};
+const int PLAYER_ANIM_FRAME = 3;
 
 Player *MakePlayer(void)
 {

@@ -7,7 +7,7 @@
 
 DWORD WINAPI BgmThread(void *arg)
 {
-    const char *path = arg; // mp3 · wav 모두 가능
+    const char *path = arg;
     char cmd[128];
 
     sprintf(cmd, "open \"%s\" type mpegvideo alias bgm", path);
@@ -53,7 +53,6 @@ void StopBgm(void)
     }
 }
 
-WavData walkSound = {0};
 WavData selectionSound = {0}; 
 
 static void LoadWav(const char *path, WavData *out)
@@ -67,13 +66,7 @@ static void LoadWav(const char *path, WavData *out)
 
 void InitAudio(void)
 {
-    LoadWav("sounds/walk.wav", &walkSound);
     LoadWav("sounds/selection.wav", &selectionSound);
-}
-
-void PlayWalk(void)
-{
-    PlaySoundA((LPCSTR)walkSound.buf, NULL, SND_MEMORY | SND_ASYNC | SND_NODEFAULT); //효과음에 프레임 정지 안하고 파일 입출력 안하게
 }
 
 void PlaySelection(void)
