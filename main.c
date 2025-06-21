@@ -10,7 +10,7 @@
 #include "score.h"
 #include "keys.h"
 #include "bool.h"
-
+#include "sounds.h"
 
 // Image to print on screen.
 typedef struct
@@ -61,6 +61,9 @@ const double fixedDeltaTime = 1000.0 / 60.0;
 // Lobby
 bool Lobby(void)
 {
+    SetVolume(500);
+    InitAudio();
+    StartBgm("sounds/lobby.wav");
 #ifdef DEBUG
     printf("Entering Lobby...\n");
     fflush(stdout);
@@ -110,12 +113,14 @@ bool Lobby(void)
         switch (input)
         {
         case 'a':
+            PlaySelection();
             if (selection > START)
             {
                 selection--;
             }
             break;
         case 'd':
+            PlaySelection();
             if (selection < QUIT)
             {
                 selection++;
@@ -127,6 +132,7 @@ bool Lobby(void)
                 free(map.pixels[y]);
             }
             free(map.pixels);
+            StopBgm();
             return LobbyExit(selection);
         }
 
@@ -209,6 +215,8 @@ void InGame(bool playing)
 #endif
     Player *player = MakePlayer();
     EnemyArray *enemies = MakeEnemies();
+
+    StartBgm("sounds/nightmare.wav");
 
 #ifdef DEBUG
     printf("Entering Loop...\n");
@@ -397,6 +405,7 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
                     {
                         playerAnimIndex = (playerAnimIndex + 1) % 3;
                         countBeforeAnimChange = 0;
+                        PlayWalk();
                     }
                 }
                 else
