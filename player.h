@@ -10,6 +10,7 @@
 #define PLAYER_ANIM_FRAME 3
 
 typedef struct Map Map;
+typedef enum bool bool;
 
 // Item
 typedef struct Item
@@ -45,7 +46,7 @@ typedef struct Player
 } Player;
 
 Player* MakePlayer(void);
-void MovePlayer(Player *player, Map *map, char input);
+bool MovePlayer(Player *player, Map *map, char input);
 void Jump(Player *player);
 void Jumping(Player *player, Map *map);
 

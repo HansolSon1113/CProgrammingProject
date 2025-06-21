@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "loader.h"
+#include "bool.h"
 
 const int jumpOffsets[JUMP_FRAMES] = {0, -3, -2, -1, 0, 1, 2, 3};
 
 Player *MakePlayer(void)
 {
     Player *player = (Player *)malloc(sizeof(Player));
-    player->dir = LEFT;
 
     Position pos = {4, 4};
     Position size = {5, 5};
@@ -66,6 +66,7 @@ Player *MakePlayer(void)
     player->position = pos;
     player->size = size;
     player->jumpIndex = 0;
+    player->dir = LEFT;
 
     LoadContent loadContent;
     loadContent.player = player;
@@ -75,12 +76,10 @@ Player *MakePlayer(void)
 }
 
 // Apply input to position
-void MovePlayer(Player *player, Map *map, char input)
+bool MovePlayer(Player *player, Map *map, char input)
 {
-    if (map->pixels[player->position.y - player->size.y + 1][player->position.x].entity == NONE)
-    {
-        player->position.y--;
-    }
+    Position goDown = {player->position.x, player->position.y + 1};
+    Interaction(&player->position, goDown, player->size, PLAYER, map);
 
     Position newPos = {player->position.x, player->position.y};
     switch (input)
@@ -89,6 +88,7 @@ void MovePlayer(Player *player, Map *map, char input)
         newPos.x -= 1;
         Interaction(&player->position, newPos, player->size, PLAYER, map);
         player->dir = LEFT;
+        break;
     case 'd':
         newPos.x += 1;
         player->dir = RIGHT;
@@ -98,6 +98,13 @@ void MovePlayer(Player *player, Map *map, char input)
         Jump(player);
         break;
     }
+
+    if(map->pixels[newPos.y][newPos.x + player->size.x / 2].entity == CLEAR || map->pixels[newPos.y][newPos.x - player->size.x / 2].entity == CLEAR || map->pixels[newPos.y + player->size.y / 2][newPos.x].entity == CLEAR || map->pixels[newPos.y - player->size.y / 2][newPos.x].entity == CLEAR)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 // Apply input to position

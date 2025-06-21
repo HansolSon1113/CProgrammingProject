@@ -168,6 +168,11 @@ EnemyArray *MakeEnemies(void)
 
 int main(void)
 {
+    CONSOLE_CURSOR_INFO cursorInfo = { 0, };
+	cursorInfo.bVisible = 0;
+	cursorInfo.dwSize = 1;
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+
     InGame(Lobby());
 
     return 0;
@@ -238,7 +243,7 @@ void InGame(bool playing)
             printf("Moving Player...\n");
             fflush(stdout);
 #endif
-            MovePlayer(player, map, input);
+            playing = MovePlayer(player, map, input);
         }
 #ifdef DEBUG
         printf("Jump Sequence...\n");

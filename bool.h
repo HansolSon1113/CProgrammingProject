@@ -1,4 +1,4 @@
-typedef enum {
+typedef enum bool {
     false,
     true
 } bool;
