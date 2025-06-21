@@ -5,8 +5,9 @@
 #include <stdlib.h>
 #include "loader.h"
 #include "map.h"
+#include "keys.h"
 
-#define JUMP_FRAMES 8
+#define JUMP_FRAMES 10
 #define PLAYER_ANIM_FRAME 3
 
 typedef struct Map Map;
@@ -46,7 +47,7 @@ typedef struct Player
 } Player;
 
 Player* MakePlayer(void);
-bool MovePlayer(Player *player, Map *map, char input);
+bool MovePlayer(Player *player, Map *map, Keys input);
 void Jump(Player *player);
 void Jumping(Player *player, Map *map);
 

@@ -9,7 +9,7 @@ typedef enum
 typedef struct
 {
     char **idle;
-    char ***anim;
+    char ****anim;
 } Animation;
 
 #endif

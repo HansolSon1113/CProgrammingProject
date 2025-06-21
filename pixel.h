@@ -11,7 +11,7 @@ typedef struct Item Item;
     ( (pos).x > (screenSize).x - ((entitySize).x / 2 + 1) ) || \
     ( (pos).y < (entitySize).y / 2 + 1 ) || \
     ( (pos).y > (screenSize).y - ((entitySize).y / 2 + 1) ) \
-) ? 0 : 1
+) ? 1 : 0
 
 // Position on screen
 typedef struct
@@ -30,6 +30,6 @@ typedef struct
 extern const Position size;
 
 
-void Interaction(Position *orgPos, Position newPos, Position size, Entity entity, Map *map);
+void Interaction(Position *orgPos, Position targetPos, Position size, Entity entity, Map *map);
 
 #endif
