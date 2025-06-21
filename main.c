@@ -62,7 +62,8 @@ const Position size = {80, 15};
 extern const int PLAYER_ANIM_FRAME;
 
 double deltaTime;
-const double fixedDeltaTime = 1000.0 / 60.0;
+const double fixedDeltaTime = 1000.0 / 30.0;
+double playTime;
 
 // music sound
 int musicVolume = 500; // 0~1000 사이 기본값
@@ -185,9 +186,9 @@ void AdjustMusicVolume(void)
 
         input = GetInput();
         if ((input == 'a' || input == 'w') && musicVolume > 0)
-            musicVolume -= 100;
-        else if ((input == 'd' || input == 's') && musicVolume < 10)
             musicVolume += 100;
+        else if ((input == 'd' || input == 's') && musicVolume < 10)
+            musicVolume -= 100;
         else if (input == '\r')
         {
             SetVolume(musicVolume);
@@ -299,6 +300,7 @@ bool Lobby(void)
 // Return bool based on Lobby's value
 bool LobbyExit(MainMenu selection)
 {
+    system("cls");
     switch (selection)
     {
     case START:
@@ -439,6 +441,7 @@ void InGame(bool playing)
         {
             Sleep((DWORD)(fixedDeltaTime - deltaTime));
         }
+        playTime += (deltaTime > fixedDeltaTime) ? deltaTime : fixedDeltaTime;
     }
 
     StopBgm();
@@ -526,6 +529,8 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
     Position printPos;
     Position center;
 
+    char text[30] = "";
+
     if (player != NULL)
     {
         half.x = player->size.x / 2;
@@ -552,6 +557,8 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
         {
             printPos.y = map->size.y - size.y;
         }
+
+        sprintf(text, "HP: %d   TIME: %6.2lf", player->health, playTime / 1000.0);
     }
 
     for (int y = 0; y < size.y; y++)
@@ -608,9 +615,14 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
         beforePlayerPos.y = player->position.y;
     }
 
-    char text[] = "";
+    char *msg = NULL;
+    if (text[0])
+    {
+        msg = malloc(strlen(text) + 1);
+        strcpy(msg, text);
+    }
 
-    Frame frame = {screen, text};
+    Frame frame = {screen, msg};
 
     return frame;
 }
@@ -618,22 +630,35 @@ Frame GenerateFrame(const Map *map, const Player *player, const EnemyArray *enem
 // Print Frame
 void UpdateScreen(const Frame *frame)
 {
-    system("cls");
+    static HANDLE hOut = NULL;
+    if (!hOut)
+        hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    COORD home = {0, 0};
+    SetConsoleCursorPosition(hOut, home); // 커서 0, 0으로
 
     for (int y = 0; y < size.y; y++)
     {
-        for (int x = 0; x < size.x; x++)
-        {
-            printf("%c", frame->screen[y][x]);
-        }
-        printf("\n");
+        fwrite(frame->screen[y], 1, size.x, stdout);
+        putchar('\n');
     }
 
-    printf("%s", frame->text);
+    if (frame->text != NULL && frame->text[0])
+    {
+        COORD textPos = {
+            size.x - strlen(frame->text), 0};
+
+        SetConsoleCursorPosition(hOut, textPos);
+        fputs(frame->text, stdout);
+    }
+
+    fflush(stdout);
 
     for (int y = 0; y < size.y; y++)
     {
         free(frame->screen[y]);
     }
     free(frame->screen);
+    if (frame->text != NULL)
+        free(frame->text);
 }
